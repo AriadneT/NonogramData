@@ -2,6 +2,7 @@ from scipy import stats
 import mysql.connector
 from mysql.connector import Error
 import os
+import matplotlib.pyplot as plotter
 
 x = []
 y = []
@@ -67,10 +68,15 @@ with open('x_values.txt', 'r') as x_file:
         for number in words:
             x_read.append(int(number))
 """
-print (x)
 # Test linear regression analysis
 slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
 
 print ("order =", slope ,"log(longest_block / length) x 100 +", intercept)
 print ("R-squared:", r_value**2)
 print ("P-value:", p_value)
+
+plotter.scatter(x, y, c="black")
+plotter.title('Scatter plot')
+plotter.xlabel('log(longest_block / length) x 100')
+plotter.ylabel('order')
+plotter.show()

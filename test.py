@@ -4,11 +4,13 @@ from mysql.connector import Error
 import os
 import matplotlib.pyplot as plotter
 
-x = []
-y = []
+# Comparisons of data with different numbers of placings
+# e.g. x35 and y35 have placings 1 to 35
+x35 = []
+y35 = []
+x25 = []
+y25 = []
 
-# Test connection to database
-# Test extraction of data
 try:
     db_connection = mysql.connector.connect(host='host',
                                          database='database',
@@ -32,26 +34,36 @@ try:
         # unless foreign key ignored, which is not desired
 
         # Lines vary from 20 to 35 in length, so limit results to first 20 solved
-        db_interaction.execute("SELECT succession FROM data WHERE succession < 21")
+        #db_interaction.execute("SELECT succession FROM data WHERE succession < 21")
+        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE length = 25")
         order_results = db_interaction.fetchall()
         for order in order_results:
-            y.append(order[0])
+            y35.append(order[0])
 
         second_db_interaction = db_connection.cursor()
         # For numbers below 1, multiply by 100 to allow stats.lineregress to work.
         # Because line lengths vary and therefore affect maximum block size,
         # correct for length. Log transformation seems to be more suitable.
-        second_db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE succession < 21")
-        longest_block_results = second_db_interaction.fetchall()
+        #db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE succession < 21")
+        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE length = 25")
+        longest_block_results = db_interaction.fetchall()
         for longest_block in longest_block_results:
-            x.append(int(longest_block[0]))
+            x35.append(int(longest_block[0]))
+
+        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE length = 35")
+        order_results = db_interaction.fetchall()
+        for order in order_results:
+            y25.append(order[0])
+
+        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE length = 35")
+        longest_block_results = db_interaction.fetchall()
+        for longest_block in longest_block_results:
+            x25.append(int(longest_block[0]))
 except Error as error:
     print("Error while connecting to MySQL", error)
 finally:
     if (db_connection.is_connected()):
         db_interaction.close()
-        second_db_interaction.close()
-        db_connection.close()
 
 """
 # Test storing data in file and extracting them
@@ -68,15 +80,45 @@ with open('x_values.txt', 'r') as x_file:
         for number in words:
             x_read.append(int(number))
 """
-# Test linear regression analysis
-slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+# Linear regression analysis
+slope35, intercept35, r_value35, p_value35, std_err35 = stats.linregress(x35,y35)
 
-print ("order =", slope ,"log(longest_block / length) x 100 +", intercept)
-print ("R-squared:", r_value**2)
-print ("P-value:", p_value)
+print ("order =", slope35 ,"log(longest_block / length) x 100 +", intercept35)
+print ("R-squared:", r_value35**2)
+print ("P-value:", p_value35)
 
-plotter.scatter(x, y, c="black")
+"""
+plotter.scatter(x35, y35, c="black")
 plotter.title('Scatter plot')
 plotter.xlabel('log(longest_block / length) x 100')
 plotter.ylabel('order')
+plotter.show()
+"""
+# Second linear regression analysis
+slope25, intercept25, r_value25, p_value25, std_err25 = stats.linregress(x25,y25)
+
+print ("order =", slope25 ,"log(longest_block / length) x 100 +", intercept25)
+print ("R-squared:", r_value25**2)
+print ("P-value:", p_value25)
+"""
+plotter.scatter(x25, y25, c="red")
+plotter.title('Scatter plot')
+plotter.xlabel('log(longest_block / length) x 100')
+plotter.ylabel('order')
+plotter.show()
+"""
+data = ((x35,y35),(x25,y25))
+colors = ("red", "black")
+groups = ("35 places", "25 places")
+
+# Create plot
+figure = plotter.figure()
+axis = figure.add_subplot(1, 1, 1)
+
+for data, color, group in zip(data, colors, groups):
+    x, y = data
+    axis.scatter(x, y, c=color, edgecolors='none', s=30, label=group)
+
+plotter.title("Scatter plot")
+plotter.legend(loc=1)
 plotter.show()

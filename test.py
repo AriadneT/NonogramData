@@ -10,6 +10,10 @@ x35 = []
 y35 = []
 x25 = []
 y25 = []
+x30 = []
+y30 = []
+x20 = []
+y20 = []
 
 try:
     db_connection = mysql.connector.connect(host='host',
@@ -24,7 +28,7 @@ try:
 
         db_interaction.execute('USE nonogram;')
 
-        create_line_table = 'CREATE TABLE IF NOT EXISTS line (line_id INTEGER(11) AUTO_INCREMENT PRIMARY KEY, length TINYINT(4) NOT NULL);'
+        create_line_table = 'CREATE TABLE IF NOT EXISTS line (line_id INTEGER(11) AUTO_INCREMENT PRIMARY KEY, length TINYINT(4) NOT NULL, places TINYINT(4) NOT NULL);'
         db_interaction.execute(create_line_table)
         # from_edge refers to blocks from top or left end
         create_data_table = 'CREATE TABLE IF NOT EXISTS data (data_id INTEGER(11) AUTO_INCREMENT PRIMARY KEY, line_id INTEGER(11) NOT NULL, succession TINYINT(4) NOT NULL, from_edge TINYINT(4) NOT NULL, block_number TINYINT(4) NOT NULL, longest_block TINYINT(4) NOT NULL, FOREIGN KEY (line_id) REFERENCES line(line_id));'
@@ -35,7 +39,7 @@ try:
 
         # Lines vary from 20 to 35 in length, so limit results to first 20 solved
         #db_interaction.execute("SELECT succession FROM data WHERE succession < 21")
-        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE length = 25")
+        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE places = 35")
         order_results = db_interaction.fetchall()
         for order in order_results:
             y35.append(order[0])
@@ -45,17 +49,17 @@ try:
         # Because line lengths vary and therefore affect maximum block size,
         # correct for length. Log transformation seems to be more suitable.
         #db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE succession < 21")
-        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE length = 25")
+        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE places = 35")
         longest_block_results = db_interaction.fetchall()
         for longest_block in longest_block_results:
             x35.append(int(longest_block[0]))
 
-        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE length = 35")
+        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE places = 25")
         order_results = db_interaction.fetchall()
         for order in order_results:
             y25.append(order[0])
 
-        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE length = 35")
+        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE places = 25")
         longest_block_results = db_interaction.fetchall()
         for longest_block in longest_block_results:
             x25.append(int(longest_block[0]))
@@ -83,6 +87,7 @@ with open('x_values.txt', 'r') as x_file:
 # Linear regression analysis
 slope35, intercept35, r_value35, p_value35, std_err35 = stats.linregress(x35,y35)
 
+print ("When 35 lines must be filled:")
 print ("order =", slope35 ,"log(longest_block / length) x 100 +", intercept35)
 print ("R-squared:", r_value35**2)
 print ("P-value:", p_value35)
@@ -97,6 +102,7 @@ plotter.show()
 # Second linear regression analysis
 slope25, intercept25, r_value25, p_value25, std_err25 = stats.linregress(x25,y25)
 
+print ("When 25 lines must be filled:")
 print ("order =", slope25 ,"log(longest_block / length) x 100 +", intercept25)
 print ("R-squared:", r_value25**2)
 print ("P-value:", p_value25)
@@ -107,9 +113,9 @@ plotter.xlabel('log(longest_block / length) x 100')
 plotter.ylabel('order')
 plotter.show()
 """
-data = ((x35,y35),(x25,y25))
-colors = ("red", "black")
-groups = ("35 places", "25 places")
+data = ((x35,y35),(x25,y25),(x20,y20))
+colors = ("red", "black","green")
+groups = ("35 places", "25 places", "20 places")
 
 # Create plot
 figure = plotter.figure()
@@ -121,4 +127,4 @@ for data, color, group in zip(data, colors, groups):
 
 plotter.title("Scatter plot")
 plotter.legend(loc=1)
-plotter.show()
+plotter.savefig("scatter_plot.png")

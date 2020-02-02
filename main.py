@@ -1,8 +1,10 @@
 from scipy import stats
 import mysql.connector
 from mysql.connector import Error
-import os
+import json
+#import os
 import matplotlib.pyplot as plotter
+from Classes.DataGroup import DataGroup
 
 # Comparisons of data with different numbers of placings
 # e.g. x35 and y35 have placings 1 to 35
@@ -10,16 +12,20 @@ x35 = []
 y35 = []
 x25 = []
 y25 = []
-x30 = []
+x30 = DataGroup("x", 30)
 y30 = []
 x20 = []
 y20 = []
+config = []
+
+with open('Configuration/config.json') as config_file:
+    config = json.load(config_file)
 
 try:
-    db_connection = mysql.connector.connect(host='host',
-                                         database='database',
-                                         user='user',
-                                         password='password')
+    db_connection = mysql.connector.connect(host=config["mysql"]["host"],
+                                         database=config["mysql"]["db"],
+                                         user=config["mysql"]["user"],
+                                         password=config["mysql"]["password"])
 
     if db_connection.is_connected():
         db_interaction = db_connection.cursor()

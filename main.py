@@ -79,27 +79,29 @@ with open('x_values.txt', 'r') as x_file:
             x_read.append(int(number))
 """
 # Linear regression analysis
+slope20, intercept20, r_value20, p_value20, std_err20 = stats.linregress(x20.data,y20.data)
+slope25, intercept25, r_value25, p_value25, std_err25 = stats.linregress(x25.data,y25.data)
+slope30, intercept30, r_value30, p_value30, std_err30 = stats.linregress(x30.data,y30.data)
 slope35, intercept35, r_value35, p_value35, std_err35 = stats.linregress(x35.data,y35.data)
 
-with open('scatter_plot.txt', 'w') as data_file:
+with open('Results/linear_regressions.txt', 'w') as data_file:
+    data_file.write("When 20 lines must be filled:\n\n")
+    data_file.write("order = " + str(slope20) + "log(longest_block / length) x 100 + " + str(intercept20) + "\n")
+    data_file.write("R-squared: " + str(r_value20**2) + "\n")
+    data_file.write("P-value: " + str(p_value20) + "\n\n")
+    data_file.write("When 25 lines must be filled:\n\n")
+    data_file.write("order = " + str(slope25) + "log(longest_block / length) x 100 + " + str(intercept25) + "\n")
+    data_file.write("R-squared: " + str(r_value25**2) + "\n")
+    data_file.write("P-value: " + str(p_value25) + "\n\n")
+    data_file.write("When 30 lines must be filled:\n\n")
+    data_file.write("order = " + str(slope30) + "log(longest_block / length) x 100 + " + str(intercept30) + "\n")
+    data_file.write("R-squared: " + str(r_value30**2) + "\n")
+    data_file.write("P-value: " + str(p_value30) + "\n\n")
     data_file.write("When 35 lines must be filled:\n\n")
     data_file.write("order = " + str(slope35) + "log(longest_block / length) x 100 + " + str(intercept35) + "\n")
     data_file.write("R-squared: " + str(r_value35**2) + "\n")
     data_file.write("P-value: " + str(p_value35) + "\n\n")
-"""
-print ("When 35 lines must be filled:")
-print ("order =", slope35 ,"log(longest_block / length) x 100 +", intercept35)
-print ("R-squared:", r_value35**2)
-print ("P-value:", p_value35)
-"""
-# Second linear regression analysis
-slope25, intercept25, r_value25, p_value25, std_err25 = stats.linregress(x25.data,y25.data)
-
-print ("When 25 lines must be filled:")
-print ("order =", slope25 ,"log(longest_block / length) x 100 +", intercept25)
-print ("R-squared:", r_value25**2)
-print ("P-value:", p_value25)
-
+    
 data = ((x35.data, y35.data), (x30.data, y30.data), (x25.data, y25.data), (x20.data, y20.data))
 colors = ("black", "blue", "green", "red")
 groups = ("35 places", "30 places", "25 places", "20 places")
@@ -112,6 +114,8 @@ for data, color, group in zip(data, colors, groups):
     x, y = data
     axis.scatter(x, y, c=color, edgecolors='none', s=30, label=group)
 
-plotter.title("Scatter plot")
+plotter.title("Scatter plot: longest block")
+axis.set_xlabel("log(longest block)/length")
+axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
-plotter.savefig("scatter_plot.png")
+plotter.savefig("Results/scatter_plot.png")

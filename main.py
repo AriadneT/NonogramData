@@ -3,8 +3,10 @@ import mysql.connector
 from mysql.connector import Error
 import json
 import matplotlib.pyplot as plotter
+import numpy
 from Classes.DataGroup import DataGroup
 from Classes.DatabaseHandler import DatabaseHandler
+from scipy.optimize import curve_fit
 
 # Comparisons of data with different numbers of available placings
 # e.g. x35 and y35 have placings 1 to 35
@@ -18,7 +20,9 @@ x20 = DataGroup("x", 20, "longest_block")
 y20 = DataGroup("y", 20, "succession")
 x_all = DataGroup("x", 0, "longest_block")
 y_all = DataGroup("y", 0, "succession")
-DataGroups = [[x35, y35], [x25, y25], [x30, y30], [x20, y20], [x_all, y_all]]
+x_all_block_number = DataGroup("x", 0, "block_number")
+y_all_block_number = DataGroup("y", 0, "block_number")
+DataGroups = [[x35, y35], [x25, y25], [x30, y30], [x20, y20], [x_all, y_all], [x_all_block_number, y_all_block_number]]
 config = []
 
 with open('Configuration/config.json') as config_file:
@@ -56,9 +60,9 @@ try:
                         # For numbers below 1, multiply by 100 to allow stats.lineregress to work.
                         # Because line lengths vary and therefore affect maximum block size,
                         # Correct for length. Log transformation seems to be more suitable.
-                        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id")
+                        db_interaction.execute("SELECT " + data_group.transform_data() + " FROM data JOIN line ON data.line_id = line.line_id")
                     else:
-                        db_interaction.execute("SELECT log(longest_block / length) * 100 FROM data JOIN line ON data.line_id = line.line_id WHERE places = " + str(data_group.spaces))
+                        db_interaction.execute("SELECT " + data_group.transform_data() + " FROM data JOIN line ON data.line_id = line.line_id WHERE places = " + str(data_group.spaces))
                     longest_block_results = db_interaction.fetchall()
                     for longest_block in longest_block_results:
                         data_group.data.append(int(longest_block[0]))
@@ -82,6 +86,7 @@ with open('x_values.txt', 'r') as x_file:
         for number in words:
             x_read.append(int(number))
 """
+
 # Linear regression analysis
 for data_pair in DataGroups:
     slope, intercept, r_value, p_value, std_err = stats.linregress(data_pair[0].data,data_pair[1].data)
@@ -91,7 +96,7 @@ for data_pair in DataGroups:
             data_file.write("When all data are included:\n\n")
         else:
             data_file.write("When " + str(data_pair[0].spaces) + " lines must be filled:\n\n")
-        data_file.write("order = " + str(slope) + "log(" + data_pair[0].column + " / length) x 100 + " + str(intercept) + "\n")
+        data_file.write("order = " + str(slope) + " " + data_pair[0].transform_data() + " + " + str(intercept) + "\n")
         data_file.write("Standard error: " + str(std_err) + "\n")
         data_file.write("R-squared: " + str(r_value**2) + "\n")
         data_file.write("P-value: " + str(p_value) + "\n\n")
@@ -113,3 +118,25 @@ axis.set_xlabel("log(longest block)/length")
 axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
 plotter.savefig("Results/longest_block_scatter.png")
+
+data = (x_all_block_number.data, y_all_block_number.data)
+figure = plotter.figure()
+axis = figure.add_subplot(1, 1, 1)
+x, y = data
+axis.scatter(x, y, c="black", edgecolors='none', s=30, label="all")
+plotter.title("Scatter plot: block number")
+axis.set_xlabel("block number")
+axis.set_ylabel("nth solved")
+plotter.legend(loc=1)
+plotter.savefig("Results/block_number_scatter.png")
+
+"""
+def func(x, a, b, c):
+    return a * x**2 + 2 * x + c
+
+estimate = [-0.01, 0.01, 0.1]
+
+optimized_params, param_covariance = curve_fit(func, x_all_block_number.data, y_all_block_number.data, estimate)
+print (optimized_params)
+print (param_covariance)
+"""

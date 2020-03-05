@@ -3,26 +3,30 @@ import mysql.connector
 from mysql.connector import Error
 import json
 import matplotlib.pyplot as plotter
-import numpy
 from Classes.DataGroup import DataGroup
 from Classes.DatabaseHandler import DatabaseHandler
-from scipy.optimize import curve_fit
+from pandas import DataFrame
+from sklearn import linear_model
+import statsmodels.api as modelling
 
 # Comparisons of data with different numbers of available placings
-# e.g. x35 and y35 have placings 1 to 35
-x35 = DataGroup("x", 35, "longest_block")
+# e.g. y35 have placings 1 to 35
+long35 = DataGroup("x", 35, "longest_block")
+block_number35 = DataGroup("x", 35, "block_number")
 y35 = DataGroup("y", 35, "succession")
-x25 = DataGroup("x", 25, "longest_block")
+long25 = DataGroup("x", 25, "longest_block")
+block_number25 = DataGroup("x", 25, "block_number")
 y25 = DataGroup("y", 25, "succession")
-x30 = DataGroup("x", 30, "longest_block")
+long30 = DataGroup("x", 30, "longest_block")
+block_number30 = DataGroup("x", 30, "block_number")
 y30 = DataGroup("y", 30, "succession")
-x20 = DataGroup("x", 20, "longest_block")
+long20 = DataGroup("x", 20, "longest_block")
+block_number20 = DataGroup("x", 20, "block_number")
 y20 = DataGroup("y", 20, "succession")
-x_all = DataGroup("x", 0, "longest_block")
+long_all = DataGroup("x", 0, "longest_block")
+block_number_all = DataGroup("x", 0, "block_number")
 y_all = DataGroup("y", 0, "succession")
-x_all_block_number = DataGroup("x", 0, "block_number")
-y_all_block_number = DataGroup("y", 0, "block_number")
-DataGroups = [[x35, y35], [x25, y25], [x30, y30], [x20, y20], [x_all, y_all], [x_all_block_number, y_all_block_number]]
+DataGroups = [[long35, y35], [long25, y25], [long30, y30], [long20, y20], [long_all, y_all], [block_number35, y35], [block_number25, y25], [block_number30, y30], [block_number20, y20], [block_number_all, y_all]]
 config = []
 
 with open('Configuration/config.json') as config_file:
@@ -48,13 +52,14 @@ try:
         for data_pair in DataGroups:
             for data_group in data_pair:
                 if data_group.type == "y":
-                    if data_group.spaces == 0:
-                        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id")
-                    else:
-                        db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE places = " + str(data_group.spaces))
-                    order_results = db_interaction.fetchall()
-                    for order in order_results:
-                        data_group.data.append(order[0])
+                    if not data_group.data:
+                        if data_group.spaces == 0:
+                            db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id")
+                        else:
+                            db_interaction.execute("SELECT succession FROM data JOIN line ON data.line_id = line.line_id WHERE places = " + str(data_group.spaces))
+                        order_results = db_interaction.fetchall()
+                        for order in order_results:
+                            data_group.data.append(order[0])
                 else:
                     if data_group.spaces == 0:
                         # For numbers below 1, multiply by 100 to allow stats.lineregress to work.
@@ -86,6 +91,10 @@ with open('x_values.txt', 'r') as x_file:
         for number in words:
             x_read.append(int(number))
 """
+# Clear text files first for each analysis
+for text_file in config["result_text_files"]:
+    with open(text_file, "w"):
+        pass
 
 # Linear regression analysis
 for data_pair in DataGroups:
@@ -101,7 +110,7 @@ for data_pair in DataGroups:
         data_file.write("R-squared: " + str(r_value**2) + "\n")
         data_file.write("P-value: " + str(p_value) + "\n\n")
 
-data = ((x35.data, y35.data), (x30.data, y30.data), (x25.data, y25.data), (x20.data, y20.data))
+data = ((long35.data, y35.data), (long30.data, y30.data), (long25.data, y25.data), (long20.data, y20.data))
 colors = ("black", "blue", "green", "red")
 groups = ("35 places", "30 places", "25 places", "20 places")
 
@@ -114,29 +123,42 @@ for data, color, group in zip(data, colors, groups):
     axis.scatter(x, y, c=color, edgecolors='none', s=30, label=group)
 
 plotter.title("Scatter plot: longest block")
-axis.set_xlabel("log(longest block)/length")
+axis.set_xlabel("log(longest block) / length x 100")
 axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
 plotter.savefig("Results/longest_block_scatter.png")
 
-data = (x_all_block_number.data, y_all_block_number.data)
+data = ((block_number35.data, y35.data), (block_number30.data, y30.data), (block_number25.data, y25.data), (block_number20.data, y20.data))
+
 figure = plotter.figure()
 axis = figure.add_subplot(1, 1, 1)
-x, y = data
-axis.scatter(x, y, c="black", edgecolors='none', s=30, label="all")
+
+for data, color, group in zip(data, colors, groups):
+    x, y = data
+    axis.scatter(x, y, c=color, edgecolors='none', s=30, label=group)
+
 plotter.title("Scatter plot: block number")
-axis.set_xlabel("block number")
+axis.set_xlabel("block number / length x 100")
 axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
 plotter.savefig("Results/block_number_scatter.png")
 
-"""
-def func(x, a, b, c):
-    return a * x**2 + 2 * x + c
+compiled_data = {
+    "succession": y_all.data,
+    "log(longest block) / length x 100": long_all.data,
+    "block number / length x 100": block_number_all.data
+    }
+data_frame = DataFrame(compiled_data, columns = ["succession", "log(longest block) / length x 100", "block number / length x 100"])
+X = data_frame[["log(longest block) / length x 100", "block number / length x 100"]]
+Y = data_frame["succession"]
 
-estimate = [-0.01, 0.01, 0.1]
+regression = linear_model.LinearRegression()
+regression.fit(X, Y)
 
-optimized_params, param_covariance = curve_fit(func, x_all_block_number.data, y_all_block_number.data, estimate)
-print (optimized_params)
-print (param_covariance)
-"""
+with open("Results/combined_regression.txt", "w") as data_file:
+    data_file.write("Succession = " + str(regression.intercept_) + " + " + str(regression.coef_[0]) + " (log(longest block) / length x 100) + " + str(regression.coef_[1]) + " (block number / length x 100)\n\n")
+    X = modelling.add_constant(X)
+    model = modelling.OLS(Y, X).fit()
+    predictions = model.predict(X) 
+    model_stats = model.summary()
+    data_file.write(str(model_stats))

@@ -1,4 +1,12 @@
 {
     "mysql": {
-    }
+        "host": "host",
+        "user": "user",
+        "password": "password",
+        "db": "db"
+    },
+	"result_text_files": [
+	    "Results/block_number_regression.txt",
+		"Results/longest_block_regression.txt"
+	]
 }

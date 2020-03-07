@@ -143,6 +143,14 @@ axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
 plotter.savefig("Results/block_number_scatter.png")
 
+figure = plotter.figure()
+x, y = (long_all, block_number_all)
+plotter.scatter(long_all.data, block_number_all.data, color="black")
+plotter.title("Longest data vs Block number")
+plotter.xlabel("log(longest block) / length x 100")
+plotter.ylabel("block number / length x 100")
+plotter.savefig("Results/block_parameters_scatter.png")
+
 compiled_data = {
     "succession": y_all.data,
     "log(longest block) / length x 100": long_all.data,

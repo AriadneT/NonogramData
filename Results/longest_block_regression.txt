@@ -1,0 +1,35 @@
+When 35 lines must be filled:
+
+order = -0.053061923390957784 log(longest_block / length) * 100 + 10.043440390273581
+Standard error: 0.013416135805322367
+R-squared: 0.08292226067175167
+P-value: 0.00011142689754332518
+
+When 25 lines must be filled:
+
+order = -0.04690210038811227 log(longest_block / length) * 100 + 4.638606223476598
+Standard error: 0.010565647429298804
+R-squared: 0.11750178765180794
+P-value: 1.75519135696862e-05
+
+When 30 lines must be filled:
+
+order = -0.031243663280247688 log(longest_block / length) * 100 + 10.913950958180976
+Standard error: 0.023254481349251843
+R-squared: 0.03018367247930491
+P-value: 0.18432556563900976
+
+When 20 lines must be filled:
+
+order = -0.05683509261184566 log(longest_block / length) * 100 + 0.6845795059342556
+Standard error: 0.0164846066503312
+R-squared: 0.2382800574463545
+P-value: 0.0013963563050699663
+
+When all data are included:
+
+order = -0.034671584167246035 log(longest_block / length) * 100 + 9.572155723441645
+Standard error: 0.007852610007232292
+R-squared: 0.044056614153150084
+P-value: 1.2824139563410922e-05
+

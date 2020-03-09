@@ -147,24 +147,24 @@ figure = plotter.figure()
 x, y = (long_all, block_number_all)
 plotter.scatter(long_all.data, block_number_all.data, color="black")
 plotter.title("Longest data vs Block number")
-plotter.xlabel("log(longest block) / length x 100")
+plotter.xlabel("log(longest block / length) x 100")
 plotter.ylabel("block number / length x 100")
 plotter.savefig("Results/block_parameters_scatter.png")
 
 compiled_data = {
     "succession": y_all.data,
-    "log(longest block) / length x 100": long_all.data,
+    "log(longest block / length) x 100": long_all.data,
     "block number / length x 100": block_number_all.data
     }
-data_frame = DataFrame(compiled_data, columns = ["succession", "log(longest block) / length x 100", "block number / length x 100"])
-X = data_frame[["log(longest block) / length x 100", "block number / length x 100"]]
+data_frame = DataFrame(compiled_data, columns = ["succession", "log(longest block / length) x 100", "block number / length x 100"])
+X = data_frame[["log(longest block / length) x 100", "block number / length x 100"]]
 Y = data_frame["succession"]
 
 regression = linear_model.LinearRegression()
 regression.fit(X, Y)
 
 with open("Results/combined_regression.txt", "w") as data_file:
-    data_file.write("Succession = " + str(regression.intercept_) + " + " + str(regression.coef_[0]) + " (log(longest block) / length x 100) + " + str(regression.coef_[1]) + " (block number / length x 100)\n\n")
+    data_file.write("Succession = " + str(regression.intercept_) + " + " + str(regression.coef_[0]) + " (log(longest block / length) x 100) + " + str(regression.coef_[1]) + " (block number / length x 100)\n\n")
     X = modelling.add_constant(X)
     model = modelling.OLS(Y, X).fit()
     predictions = model.predict(X) 

@@ -1,12 +1,12 @@
-Succession = 8.04957771622771 + -0.02017471695912802 (log(longest block) / length x 100) + 0.21718267543450182 (block number / length x 100)
+Succession = 8.04957771622771 + -0.02017471695912802 (log(longest block / length) x 100) + 0.21718267543450182 (block number / length x 100)
 
                             OLS Regression Results                            
 ==============================================================================
 Dep. Variable:             succession   R-squared:                       0.062
 Model:                            OLS   Adj. R-squared:                  0.057
 Method:                 Least Squares   F-statistic:                     13.87
-Date:                Fri, 06 Mar 2020   Prob (F-statistic):           1.46e-06
-Time:                        22:24:48   Log-Likelihood:                -1523.6
+Date:                Sun, 08 Mar 2020   Prob (F-statistic):           1.46e-06
+Time:                        21:14:01   Log-Likelihood:                -1523.6
 No. Observations:                 425   AIC:                             3053.
 Df Residuals:                     422   BIC:                             3065.
 Df Model:                           2                                         
@@ -15,7 +15,7 @@ Covariance Type:            nonrobust
                                         coef    std err          t      P>|t|      [0.025      0.975]
 -----------------------------------------------------------------------------------------------------
 const                                 8.0496      1.435      5.611      0.000       5.230      10.869
-log(longest block) / length x 100    -0.0202      0.009     -2.161      0.031      -0.039      -0.002
+log(longest block / length) x 100    -0.0202      0.009     -2.161      0.031      -0.039      -0.002
 block number / length x 100           0.2172      0.077      2.816      0.005       0.066       0.369
 ==============================================================================
 Omnibus:                       46.141   Durbin-Watson:                   0.336

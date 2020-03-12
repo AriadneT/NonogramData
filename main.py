@@ -1,10 +1,10 @@
-from scipy import stats
 import mysql.connector
 from mysql.connector import Error
 import json
 import matplotlib.pyplot as plotter
 from Classes.DataGroup import DataGroup
 from Classes.DatabaseHandler import DatabaseHandler
+from Classes.LinearAnalyser import LinearAnalyser
 from pandas import DataFrame
 from sklearn import linear_model
 import statsmodels.api as modelling
@@ -26,7 +26,16 @@ y20 = DataGroup("y", 20, "succession")
 long_all = DataGroup("x", 0, "longest_block")
 block_number_all = DataGroup("x", 0, "block_number")
 y_all = DataGroup("y", 0, "succession")
-DataGroups = [[long35, y35], [long25, y25], [long30, y30], [long20, y20], [long_all, y_all], [block_number35, y35], [block_number25, y25], [block_number30, y30], [block_number20, y20], [block_number_all, y_all]]
+DataGroups = [[long35, y35],
+              [long25, y25],
+              [long30, y30],
+              [long20, y20],
+              [long_all, y_all],
+              [block_number35, y35],
+              [block_number25, y25],
+              [block_number30, y30],
+              [block_number20, y20],
+              [block_number_all, y_all]]
 config = []
 
 with open('Configuration/config.json') as config_file:
@@ -34,9 +43,9 @@ with open('Configuration/config.json') as config_file:
 
 try:
     db_connection = mysql.connector.connect(host=config["mysql"]["host"],
-                                         database=config["mysql"]["db"],
-                                         user=config["mysql"]["user"],
-                                         password=config["mysql"]["password"])
+                                            database=config["mysql"]["db"],
+                                            user=config["mysql"]["user"],
+                                            password=config["mysql"]["password"])
 
     if db_connection.is_connected():
         db_interaction = db_connection.cursor()
@@ -97,20 +106,14 @@ for text_file in config["result_text_files"]:
         pass
 
 # Linear regression analysis
-for data_pair in DataGroups:
-    slope, intercept, r_value, p_value, std_err = stats.linregress(data_pair[0].data,data_pair[1].data)
+linear_analyser = LinearAnalyser()
 
-    with open("Results/" + data_pair[0].column + "_regression.txt", "a") as data_file:
-        if data_pair[0].spaces == 0:
-            data_file.write("When all data are included:\n\n")
-        else:
-            data_file.write("When " + str(data_pair[0].spaces) + " lines must be filled:\n\n")
-        data_file.write("order = " + str(slope) + " " + data_pair[0].transform_data() + " + " + str(intercept) + "\n")
-        data_file.write("Standard error: " + str(std_err) + "\n")
-        data_file.write("R-squared: " + str(r_value**2) + "\n")
-        data_file.write("P-value: " + str(p_value) + "\n\n")
+linear_analyser.recordLinearRegressions(DataGroups)
 
-data = ((long35.data, y35.data), (long30.data, y30.data), (long25.data, y25.data), (long20.data, y20.data))
+data = ((long35.data, y35.data),
+        (long30.data, y30.data),
+        (long25.data, y25.data),
+        (long20.data, y20.data))
 colors = ("black", "blue", "green", "red")
 groups = ("35 places", "30 places", "25 places", "20 places")
 
@@ -128,7 +131,10 @@ axis.set_ylabel("nth solved")
 plotter.legend(loc=1)
 plotter.savefig("Results/longest_block_scatter.png")
 
-data = ((block_number35.data, y35.data), (block_number30.data, y30.data), (block_number25.data, y25.data), (block_number20.data, y20.data))
+data = ((block_number35.data, y35.data),
+        (block_number30.data, y30.data),
+        (block_number25.data, y25.data),
+        (block_number20.data, y20.data))
 
 figure = plotter.figure()
 axis = figure.add_subplot(1, 1, 1)

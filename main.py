@@ -36,6 +36,7 @@ DataGroups = [[long35, y35],
               [block_number30, y30],
               [block_number20, y20],
               [block_number_all, y_all]]
+prelim_results = []
 config = []
 
 with open('Configuration/config.json') as config_file:
@@ -80,6 +81,18 @@ try:
                     longest_block_results = db_interaction.fetchall()
                     for longest_block in longest_block_results:
                         data_group.data.append(int(longest_block[0]))
+
+        db_interaction.execute("SELECT MAX(line_id) FROM data")
+        number_of_lines = db_interaction.fetchall()[0][0]
+        line_number = 1
+
+        while line_number <= number_of_lines:
+            # ABS() to ensure results are +ive
+            db_interaction.execute("SELECT ABS(d2.from_edge - d1.from_edge) AS difference FROM data d1 INNER JOIN data d2 ON d2.data_id = d1.data_id + 1 WHERE d1.line_id = " + str(line_number))
+            diff_line_results = db_interaction.fetchall()
+            for diff_line_result in diff_line_results:
+                prelim_results.append(diff_line_result[0])
+            line_number += 1
 except Error as error:
     print("Error while connecting to MySQL", error)
 finally:
@@ -100,6 +113,8 @@ with open('x_values.txt', 'r') as x_file:
         for number in words:
             x_read.append(int(number))
 """
+print (prelim_results)
+
 # Clear text files first for each analysis
 for text_file in config["result_text_files"]:
     with open(text_file, "w"):

@@ -1,12 +1,14 @@
 import mysql.connector
 from mysql.connector import Error
 import json
+import numpy
 import matplotlib.pyplot as plotter
 from Classes.DataGroup import DataGroup
 from Classes.DatabaseHandler import DatabaseHandler
 from Classes.LinearAnalyser import LinearAnalyser
 from pandas import DataFrame
 from sklearn import linear_model
+from collections import Counter
 import statsmodels.api as modelling
 
 # Comparisons of data with different numbers of available placings
@@ -99,21 +101,18 @@ finally:
     if (db_connection.is_connected()):
         db_interaction.close()
 
-"""
-# Test storing data in file and extracting them
-with open('x_values.txt', 'w') as x_file:
-    for number in x:
-        entry = str(number) + " "
-        x_file.write(entry)
-x_read = []
-with open('x_values.txt', 'r') as x_file:
-    for line in x_file:
-        line = line.strip() 
-        words = line.split(' ')
-        for number in words:
-            x_read.append(int(number))
-"""
-print (prelim_results)
+# Ensure bar chart displays data in correct order
+prelim_results.sort()
+# Count number of each difference value and create bar chart from it
+labels, values = zip(*Counter(prelim_results).items())
+indexes = numpy.arange(len(labels))
+width = 1
+plotter.bar(indexes, values, width)
+plotter.xticks(indexes + width * 0.5, labels)
+plotter.title("Frequency of spacing between nth line and nth + 1 line")
+plotter.xlabel("Spacing")
+plotter.ylabel("Frequency")
+plotter.savefig("Results/difference_bar.png")
 
 # Clear text files first for each analysis
 for text_file in config["result_text_files"]:

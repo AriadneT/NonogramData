@@ -1,0 +1,45 @@
+Preliminary Results
+
+Preliminary results indicate that the number of blocks in a line relative to 
+the line's length and the percentage of the line taken by the longest block 
+weakly predicts the order in which an entire line is solved. The former has a 
+positive correlation to the order in which lines are resolved, and the latter 
+has a negative relationship.
+
+Neither the percentage of the line taken by the shortest line nor the 
+percentage of the line covered by blocks and/or predicted spaces (both not 
+shown) have a discernible correlation to the order in which an entire line is 
+solved.
+
+Although the lines vary from 20 to 35 units in length, the lines' lengths has 
+no apparent influence on the linear equations associated with the parameters 
+mentioned above.
+
+The number of blocks and the longest block's length predict only four to five 
+percent of the variance in line order, but the two parameters much more 
+strongly predict each other. Nevertheless, combining the two parameters in an 
+equation slightly improves the predictive power (to six percent), and both were 
+shown to have an influence on the line order independently of each other.
+
+A much greater influence on the relative order that lines are resolved, 
+however, appears to be the proximity of the line to the one that solved last. 
+The frequency that the nth+1 line is next to (or at least very close to) the 
+nth line is far higher than that which would occur if the lines were selected 
+in random order (not shown).
+
+This complicates the process of predicting the order in which lines are 
+resolved. Whether the predicted first-resolved line is correct largely 
+determines the accuracy of the final prediction. In addition, it would not be 
+sufficient to select a neighbouring line as the second-resolved and then move - 
+in single spaces - left or right until the edge of a nonogram is reached, which 
+is the trajectory that the preliminary results seem to indicate.
+
+Any method for predicting the order would need to calculate the probability 
+that any line after the first-resolved one would be the nth+1 one, taking into 
+account where it is relative to the nth line, its longest block's length and 
+the number of blocks it has.
+
+At this point, the project is (at least temporarily) halted, as the author does 
+not currently have the skills and/or knowledge to develop a predictive method 
+that could balance these three factors - and possibly others that have not yet 
+been considered.
